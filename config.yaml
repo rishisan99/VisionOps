@@ -1,0 +1,32 @@
+dataset:
+    name: "plantvillage"
+    variant: "color"
+
+paths:
+    source_dir: "data/_source/plantvillage" # staging (not DVC)
+    raw_dir: "data/raw" # DVC
+    bad_dir: "data/raw_bad" # optional
+    processed_dir: "data/processed" # DVC
+    splits_dir: "data/splits" # DVC
+    metadata_dir: "data/metadata" # DVC
+
+selection:
+    seed: 42
+    classes:
+        Tomato_healthy: 1000
+        Tomato_Early_blight: 1000
+        Tomato_Late_blight: 1000
+        Tomato_Septoria_leaf_spot: 1000
+
+processing:
+    target_size: [224, 224]
+    allowed_ext: [".jpg", ".jpeg", ".png"]
+
+split:
+    train_ratio: 0.70
+    val_ratio: 0.15
+    test_ratio: 0.15
+    stratify: true
+
+thresholds:
+    max_corrupt_rate: 0.01
