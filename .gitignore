@@ -7,8 +7,12 @@ __pycache__/
 # Logs
 logs/
 
-# Artifacts (generated outputs)
-Artifacts/
+# Ignore all generated artifacts
+Artifacts/*
+
+# BUT allow DVC metadata files
+!Artifacts/**/*.dvc
+
 
 # Data source (external)
 data/_source/
