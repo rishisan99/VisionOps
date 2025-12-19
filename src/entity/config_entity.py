@@ -218,3 +218,94 @@ class DataSplittingConfig:
         _ensure_dir(self.train_dir)
         _ensure_dir(self.val_dir)
         _ensure_dir(self.test_dir)
+
+
+class ModelTrainingConfig:
+    def __init__(self, training_pipeline_config: TrainingPipelineConfig):
+        self.model_training_dir: str = os.path.join(
+            training_pipeline_config.artifact_dir,
+            tp.MODEL_TRAINING_DIR_NAME
+        )
+
+        os.makedirs(self.model_training_dir, exist_ok=True)
+
+class RepresentationLearningConfig:
+    def __init__(self, training_pipeline_config: TrainingPipelineConfig):
+        self.ssl_dir: str = os.path.join(
+            training_pipeline_config.artifact_dir,
+            tp.MODEL_TRAINING_DIR_NAME,
+            tp.SSL_REPRESENTATION_DIR_NAME
+        )
+
+        self.checkpoints_dir: str = os.path.join(self.ssl_dir, tp.CHECKPOINTS_DIR_NAME)
+        self.metrics_dir: str = os.path.join(self.ssl_dir, tp.METRICS_DIR_NAME)
+
+        # Training params (CPU/MPS friendly)
+        self.epochs: int = 1 #20 #10
+        self.batch_size: int = 64
+        self.learning_rate: float = 3e-4
+        self.temperature: float = 0.5
+
+        os.makedirs(self.ssl_dir, exist_ok=True)
+        os.makedirs(self.checkpoints_dir, exist_ok=True)
+        os.makedirs(self.metrics_dir, exist_ok=True)
+
+        self.ssl_metrics_file_path: str = os.path.join(
+            self.metrics_dir, tp.SSL_METRICS_FILE
+        )
+
+class FineTuneModelConfig:
+    def __init__(self, training_pipeline_config: TrainingPipelineConfig):
+        self.finetune_dir: str = os.path.join(
+            training_pipeline_config.artifact_dir,
+            tp.MODEL_TRAINING_DIR_NAME,
+            tp.FINETUNE_CLASSIFIER_DIR_NAME
+        )
+
+        self.checkpoints_dir: str = os.path.join(self.finetune_dir, tp.CHECKPOINTS_DIR_NAME)
+        self.metrics_dir: str = os.path.join(self.finetune_dir, tp.METRICS_DIR_NAME)
+
+        # Training params
+        self.epochs: int = 1 #25 #15
+        self.batch_size: int = 32
+        self.learning_rate: float = 1e-3
+        self.freeze_backbone: bool = True
+
+        os.makedirs(self.finetune_dir, exist_ok=True)
+        os.makedirs(self.checkpoints_dir, exist_ok=True)
+        os.makedirs(self.metrics_dir, exist_ok=True)
+
+        self.metrics_file_path: str = os.path.join(
+            self.metrics_dir, tp.FINETUNE_METRICS_FILE
+        )
+        self.confusion_matrix_path: str = os.path.join(
+            self.metrics_dir, tp.CONFUSION_MATRIX_FILE
+        )
+        
+        # -------------------------
+        # Two-phase fine-tuning (accuracy boost)
+        # -------------------------
+        self.phase1_epochs: int = 1 # 20          # head-only epochs (keep most epochs here)
+        self.phase2_unfreeze_layer4: bool = True
+        self.phase2_epochs: int = 1 #5           # 3–5 is enough
+        self.phase2_learning_rate: float = 1e-4  # small LR for stability on MPS
+
+class ExplainabilityConfig:
+    def __init__(self, training_pipeline_config: TrainingPipelineConfig):
+        self.explainability_dir: str = os.path.join(
+            training_pipeline_config.artifact_dir,
+            tp.MODEL_TRAINING_DIR_NAME,
+            tp.EXPLAINABILITY_DIR_NAME
+        )
+
+        self.heatmaps_dir: str = os.path.join(self.explainability_dir, "heatmaps")
+
+        # How many samples to explain
+        self.samples_per_class: int = 5
+
+        os.makedirs(self.explainability_dir, exist_ok=True)
+        os.makedirs(self.heatmaps_dir, exist_ok=True)
+
+        self.index_file_path: str = os.path.join(
+            self.explainability_dir, tp.EXPLAINABILITY_INDEX_FILE
+        )

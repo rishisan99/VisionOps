@@ -1,5 +1,9 @@
 # src/constants/training_pipeline.py
 
+# ================
+# ETL (Layer 1)
+# ================
+
 # Pipeline meta
 PIPELINE_NAME: str = "vision_etl_pipeline"
 ARTIFACTS_ROOT_DIR: str = "Artifacts"
@@ -46,3 +50,25 @@ SPLIT_REPORT_FILE: str = "split_report.json"
 DATASET_STATS_PROCESSED_FILE: str = "dataset_stats_processed.json"
 
 SPLITS_CSV_FILE: str = "splits.csv"
+
+# =========================
+# Model Training (Layer 2)
+# =========================
+
+MODEL_TRAINING_DIR_NAME: str = "model_training"
+
+# Stage-wise directories
+SSL_REPRESENTATION_DIR_NAME: str = "ssl_representation"
+FINETUNE_CLASSIFIER_DIR_NAME: str = "finetune_classifier"
+EXPLAINABILITY_DIR_NAME: str = "explainability"
+
+# Common subdirs
+CHECKPOINTS_DIR_NAME: str = "checkpoints"
+METRICS_DIR_NAME: str = "metrics"
+
+# Files
+SSL_METRICS_FILE: str = "ssl_metrics.json"
+FINETUNE_METRICS_FILE: str = "metrics.json"
+CONFUSION_MATRIX_FILE: str = "confusion_matrix.png"
+
+EXPLAINABILITY_INDEX_FILE: str = "index.json"
