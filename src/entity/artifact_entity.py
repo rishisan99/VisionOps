@@ -56,3 +56,44 @@ class DataSplittingArtifact:
     per_class_train: Dict[str, int]
     per_class_val: Dict[str, int]
     per_class_test: Dict[str, int]
+    
+# =========================
+# Layer 2 Artifacts
+# =========================
+
+@dataclass
+class RepresentationLearningArtifact:
+    ssl_dir: str
+    checkpoints_dir: str
+    metrics_dir: str
+
+    best_backbone_path: str
+    ssl_metrics_file_path: str
+
+    total_epochs: int
+    final_loss: float
+
+
+@dataclass
+class ModelTrainerArtifact:
+    finetune_dir: str
+    checkpoints_dir: str
+    metrics_dir: str
+
+    trained_model_path: str
+    metrics_file_path: str
+    confusion_matrix_path: str
+
+    accuracy: float
+    f1_score: float
+    precision: float
+    recall: float
+
+
+@dataclass
+class ExplainabilityArtifact:
+    explainability_dir: str
+    heatmaps_dir: str
+    index_file_path: str
+
+    total_samples: int
