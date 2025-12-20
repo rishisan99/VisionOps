@@ -20,4 +20,6 @@ data/_source/
 # OS
 .DS_Store
 
-
+# Model binaries
+*.pt
+app/backend/classifier.pt
