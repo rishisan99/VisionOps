@@ -24,6 +24,19 @@ from src.entity.artifact_entity import (
 )
 from src.components.data_loader import create_supervised_dataloader, get_device
 
+import mlflow
+from src.utils.mlflow_utils import (
+    setup_mlflow,
+    start_run,
+    log_params,
+    log_metrics,
+    log_artifact,
+    end_run
+)
+
+
+from src.entity.config_entity import MLflowConfig
+
 
 def compute_confusion_matrix(y_true: List[int], y_pred: List[int], num_classes: int) -> torch.Tensor:
     cm = torch.zeros((num_classes, num_classes), dtype=torch.int64)
@@ -212,6 +225,24 @@ class FineTuneTrainer:
 
             criterion = nn.CrossEntropyLoss()
 
+            mlflow_cfg = MLflowConfig()
+            setup_mlflow(mlflow_cfg.experiment_name, mlflow_cfg.tracking_uri)
+
+            run = start_run(
+                run_name="finetune_resnet18_classifier",
+                tags={"stage": "finetune", "model": "resnet18"}
+            )
+
+            log_params({
+                "batch_size": self.config.batch_size,
+                "phase1_epochs": self.config.phase1_epochs,
+                "phase2_epochs": self.config.phase2_epochs,
+                "lr_phase1": self.config.learning_rate,
+                "lr_phase2": self.config.phase2_learning_rate,
+                "freeze_backbone": True,
+                "device": str(self.device),
+            })
+            
             # -------------------------
             # Phase 1 optimizer (head only)
             # -------------------------
@@ -338,6 +369,27 @@ class FineTuneTrainer:
                 "model_checkpoint": best_model_path,
             }
             self._write_json(self.config.metrics_file_path, metrics_payload)
+
+            log_metrics({
+                "test_accuracy": test_acc,
+                "precision_macro": precision,
+                "recall_macro": recall,
+                "f1_macro": f1,
+            })
+
+            # Log artifacts
+            log_artifact(self.config.metrics_file_path)
+            log_artifact(self.config.confusion_matrix_path)
+            log_artifact(best_model_path)
+
+            model_uri = f"runs:/{mlflow.active_run().info.run_id}/classifier.pt"
+
+            mlflow.register_model(
+                model_uri=model_uri,
+                name="tomato_leaf_classifier"
+            )
+
+            end_run()
 
             logging.info("[FineTune] Supervised fine-tuning completed successfully.")
 

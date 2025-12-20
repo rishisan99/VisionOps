@@ -1,0 +1,7 @@
+[core]
+    remote = storage
+['remote "storage"']
+    url = https://dagshub.com/santhoshrishi9999/VisionOps.dvc
+    auth = basic
+    user = santhoshrishi9999
+    password = f725fcc7a722fb89463fda9f9e9e11792cd36ad2

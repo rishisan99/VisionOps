@@ -241,7 +241,7 @@ class RepresentationLearningConfig:
         self.metrics_dir: str = os.path.join(self.ssl_dir, tp.METRICS_DIR_NAME)
 
         # Training params (CPU/MPS friendly)
-        self.epochs: int = 1 #20 #10
+        self.epochs: int = 25 #10
         self.batch_size: int = 64
         self.learning_rate: float = 3e-4
         self.temperature: float = 0.5
@@ -266,7 +266,7 @@ class FineTuneModelConfig:
         self.metrics_dir: str = os.path.join(self.finetune_dir, tp.METRICS_DIR_NAME)
 
         # Training params
-        self.epochs: int = 1 #25 #15
+        self.epochs: int = 25 #15
         self.batch_size: int = 32
         self.learning_rate: float = 1e-3
         self.freeze_backbone: bool = True
@@ -285,9 +285,9 @@ class FineTuneModelConfig:
         # -------------------------
         # Two-phase fine-tuning (accuracy boost)
         # -------------------------
-        self.phase1_epochs: int = 1 # 20          # head-only epochs (keep most epochs here)
+        self.phase1_epochs: int = 20          # head-only epochs (keep most epochs here)
         self.phase2_unfreeze_layer4: bool = True
-        self.phase2_epochs: int = 1 #5           # 3–5 is enough
+        self.phase2_epochs: int = 5           # 3–5 is enough
         self.phase2_learning_rate: float = 1e-4  # small LR for stability on MPS
 
 class ExplainabilityConfig:
@@ -309,3 +309,9 @@ class ExplainabilityConfig:
         self.index_file_path: str = os.path.join(
             self.explainability_dir, tp.EXPLAINABILITY_INDEX_FILE
         )
+
+class MLflowConfig:
+    def __init__(self):
+        # Local default; later override with DagsHub URI
+        self.tracking_uri: str | None = os.getenv("MLFLOW_TRACKING_URI", None)
+        self.experiment_name: str = os.getenv("MLFLOW_EXPERIMENT_NAME", "VisionOps")

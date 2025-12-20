@@ -26,6 +26,16 @@ from src.entity.artifact_entity import (
 )
 from src.components.data_loader import get_device
 
+from src.utils.mlflow_utils import (
+    setup_mlflow,
+    start_run,
+    log_params,
+    log_metrics,
+    log_artifacts,
+    end_run
+)
+from src.entity.config_entity import MLflowConfig
+
 
 # -----------------------------
 # Utilities
@@ -192,6 +202,14 @@ class Explainability:
     ) -> ExplainabilityArtifact:
         try:
             logging.info(f"[Grad-CAM] Using device: {self.device}")
+            
+            mlflow_cfg = MLflowConfig()
+            setup_mlflow(mlflow_cfg.experiment_name, mlflow_cfg.tracking_uri)
+
+            run = start_run(
+                run_name="gradcam_explainability",
+                tags={"stage": "explainability", "method": "grad-cam"}
+            )
 
             # Prepare output dirs
             correct_dir = os.path.join(self.config.heatmaps_dir, "correct")
@@ -219,6 +237,12 @@ class Explainability:
                 test_dir=data_splitting_artifact.test_dir,
                 samples_per_class=self.config.samples_per_class
             )
+            
+            log_params({
+                "samples_per_class": self.config.samples_per_class,
+                "total_samples": len(samples),
+                "device": str(self.device),
+            })
 
             tfm = get_eval_transform(224)
 
@@ -272,6 +296,15 @@ class Explainability:
                 "entries": index_entries
             }
             self._write_json(self.config.index_file_path, index_payload)
+
+            log_metrics({
+                "total_samples": total
+            })
+
+            # Log entire explainability folder (heatmaps + index.json)
+            log_artifacts(self.config.explainability_dir)
+
+            end_run()
 
             logging.info("[Grad-CAM] Explainability generation completed successfully.")
 

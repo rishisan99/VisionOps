@@ -18,6 +18,8 @@ from src.entity.config_entity import RepresentationLearningConfig
 from src.entity.artifact_entity import RepresentationLearningArtifact
 from src.components.data_loader import create_ssl_dataloader, get_device
 
+from src.utils.mlflow_utils import setup_mlflow, start_run, log_params, log_metrics, log_artifact, log_artifacts, end_run
+from src.entity.config_entity import MLflowConfig
 
 # ------------------------------
 # Projection Head (SimCLR)
@@ -104,6 +106,18 @@ class RepresentationLearning:
         try:
             logging.info(f"[SSL] Using device: {self.device}")
 
+            mlflow_cfg = MLflowConfig()
+            setup_mlflow("VisionOps", mlflow_cfg.tracking_uri)
+
+            run = start_run(run_name="ssl_resnet18_simclr_lite", tags={"stage":"ssl"})
+            log_params({
+            "epochs": self.config.epochs,
+            "batch_size": self.config.batch_size,
+            "lr": self.config.learning_rate,
+            "temperature": self.config.temperature,
+            "device": str(self.device),
+            })
+            
             # Data
             loader = create_ssl_dataloader(
                 data_dir=ssl_train_dir,
@@ -170,6 +184,13 @@ class RepresentationLearning:
                 "best_backbone_path": best_ckpt_path,
             }
             self._write_json(self.config.ssl_metrics_file_path, metrics_payload)
+
+
+            # log final + best
+            log_metrics({"final_loss": losses[-1], "best_loss": best_loss})
+            log_artifact(self.config.ssl_metrics_file_path)
+            log_artifact(best_ckpt_path)
+            end_run()
 
             logging.info("[SSL] Representation learning completed successfully.")
 

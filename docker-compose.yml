@@ -1,0 +1,26 @@
+services:
+    backend:
+        build:
+            context: ./app/backend
+        container_name: visionops-backend
+        ports:
+            - "8000:8000"
+        environment:
+            - MODEL_PATH=classifier.pt
+            - DEVICE=cpu
+            - IMAGE_SIZE=224
+        volumes:
+            # Copy or mount your trained model into the container
+            # Put the file at: app/backend/classifier.pt (recommended)
+            - ./app/backend/classifier.pt:/app/classifier.pt:ro
+
+    frontend:
+        build:
+            context: ./app/frontend
+        container_name: visionops-frontend
+        ports:
+            - "8501:8501"
+        environment:
+            - API_URL=http://backend:8000
+        depends_on:
+            - backend
