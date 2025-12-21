@@ -23,3 +23,8 @@ data/_source/
 # Model binaries
 *.pt
 app/backend/classifier.pt
+
+# Ec2 files
+VisionOps.pem
+visionops-ci
+visionops-ci.pub
