@@ -2,13 +2,25 @@ services:
     backend:
         build:
             context: ./app/backend
-        container_name: visionops-backend
         ports:
-            - "8000:8000"
+            - "${BACKEND_PORT:-8002}:7000"
         environment:
             - MODEL_PATH=classifier.pt
             - DEVICE=cpu
             - IMAGE_SIZE=224
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "python",
+                    "-c",
+                    "import urllib.request; urllib.request.urlopen('http://localhost:7000/health')",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 20s
+        restart: unless-stopped
         volumes:
             # Copy or mount your trained model into the container
             # Put the file at: app/backend/classifier.pt (recommended)
@@ -17,10 +29,11 @@ services:
     frontend:
         build:
             context: ./app/frontend
-        container_name: visionops-frontend
         ports:
-            - "8501:8501"
+            - "${FRONTEND_PORT:-8502}:8502"
         environment:
-            - API_URL=http://backend:8000
+            - API_URL=${API_URL:-http://backend:7000}
         depends_on:
-            - backend
+            backend:
+                condition: service_healthy
+        restart: unless-stopped
